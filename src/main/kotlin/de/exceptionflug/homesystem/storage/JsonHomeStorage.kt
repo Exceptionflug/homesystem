@@ -14,7 +14,7 @@ import kotlin.collections.HashSet
 class JsonHomeStorage(val backend: File) : IHomeStorage {
 
     companion object {
-        val gson: Gson = GsonBuilder().registerTypeAdapter(Location::class.java, LocationJsonSerializer()).setPrettyPrinting().create()
+        val GSON: Gson = GsonBuilder().registerTypeAdapter(Location::class.java, LocationJsonSerializer()).setPrettyPrinting().create()
     }
 
     private var homes: MutableSet<Home> = HashSet()
@@ -24,7 +24,11 @@ class JsonHomeStorage(val backend: File) : IHomeStorage {
             backend.createNewFile()
         } else if(backend.isDirectory) throw IllegalStateException("The given file is a directory!")
         JsonReader(BufferedReader(FileReader(backend))).use {
-            this.homes = gson.fromJson<JsonHomeStorage>(it, this::class.java).homes
+            try {
+                this.homes = GSON.fromJson<JsonHomeStorage>(it, this::class.java).homes
+            } catch (e: NullPointerException) {
+                // If the file is completely empty, an exception will be thrown while attempting to parse it
+            }
         }
     }
 
@@ -32,7 +36,7 @@ class JsonHomeStorage(val backend: File) : IHomeStorage {
         if(!homes.contains(home)) {
             homes.add(home)
         }
-        gson.toJson(this, this::class.java, JsonWriter(BufferedWriter(FileWriter(backend))))
+        GSON.toJson(this, this::class.java, JsonWriter(BufferedWriter(FileWriter(backend))))
     }
 
     override fun load(id: UUID): Home? {
@@ -41,7 +45,7 @@ class JsonHomeStorage(val backend: File) : IHomeStorage {
         }
         // If the desired home is not in memory, try to reload from the backend
         JsonReader(BufferedReader(FileReader(backend))).use {
-            this.homes = gson.fromJson<JsonHomeStorage>(it, this::class.java).homes
+            this.homes = GSON.fromJson<JsonHomeStorage>(it, this::class.java).homes
         }
         return homes.firstOrNull {it.id == id}
     }

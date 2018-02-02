@@ -1,3 +1,5 @@
 name: HomeSystem
 author: Exceptionflug
 version: 1.0
+
+main: de.exceptionflug.homesystem.HomeSystemPlugin

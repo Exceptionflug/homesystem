@@ -30,7 +30,7 @@ class HomeSystemPlugin : JavaPlugin() {
         config.options().copyDefaults(true)
         config.options().header("Configuration file of the HomeSystem")
         config.addDefault("backend.type", "json")
-        config.addDefault("backend.uri", "file://homes.json")
+        config.addDefault("backend.uri", File("./plugins/HomeSystem/homes.json").toURI().toString())
         saveConfig()
         backendType = config.getString("backend.type")
         val uri = URI(config.getString("backend.uri"))
