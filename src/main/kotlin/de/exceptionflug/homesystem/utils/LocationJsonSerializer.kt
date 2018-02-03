@@ -7,7 +7,7 @@ import com.google.gson.JsonSerializer
 import org.bukkit.Location
 import java.lang.reflect.Type
 
-class LocationJsonSerializer() : JsonSerializer<Location> {
+class LocationJsonSerializer : JsonSerializer<Location> {
 
     override fun serialize(src: Location?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
         if(src == null) throw IllegalStateException("Cannot serialize a null location")

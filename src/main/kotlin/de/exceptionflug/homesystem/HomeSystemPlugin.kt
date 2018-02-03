@@ -17,12 +17,14 @@ import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.net.URI
 import java.util.*
 import java.util.logging.Level
+import java.util.logging.Logger
 
 class HomeSystemPlugin : JavaPlugin(), Listener {
 
@@ -30,6 +32,9 @@ class HomeSystemPlugin : JavaPlugin(), Listener {
         private set
 
     lateinit var requestManager: RequestManager
+        private set
+
+    var notificationRadii: Int = 50
         private set
 
     private val mapPlayerToScoreboard = HashMap<UUID, PlayerScoreboard>()
@@ -62,9 +67,10 @@ class HomeSystemPlugin : JavaPlugin(), Listener {
         config.options().header("Configuration file of the HomeSystem")
         config.addDefault("backend.type", "json")
         config.addDefault("backend.uri", File("./plugins/HomeSystem/homes.json").absoluteFile.toURI().toString())
+        config.addDefault("settings.notification-radii", 50)
         saveConfig()
-        backendType = config.getString("backend.type")
-        val uri = URI(config.getString("backend.uri"))
+        backendType = config.getString("backend.type", "json")
+        val uri = URI(config.getString("backend.uri", File("./plugins/HomeSystem/homes.json").absoluteFile.toURI().toString()))
         if(backendType == "json") {
             homeStorage = JsonHomeStorage(File(uri))
         } else if(backendType == "mysql") {
@@ -74,6 +80,7 @@ class HomeSystemPlugin : JavaPlugin(), Listener {
             OwnerSwapSQLObject(connectionHolder).createTable()
             homeStorage = MySQLHomeStorage(connectionHolder)
         }
+        notificationRadii = config.getInt("settings.notification-radii", 50)
     }
 
     @Completer(name = "hs")
@@ -100,8 +107,16 @@ class HomeSystemPlugin : JavaPlugin(), Listener {
         return ret
     }
 
+    // ===============================================================================================
+    // Small event-handling section. Please don't kill me because I placed this in the main class :(
+    // ===============================================================================================
+
     @EventHandler
     fun onJoin(e: PlayerJoinEvent) {
+        if(!::homeStorage.isInitialized) {
+            Bukkit.getLogger().warning("[HomeSystem] No backend was initialized! Please check your config.")
+            return
+        }
         val board = PlayerScoreboard(e.player)
         mapPlayerToScoreboard[e.player.uniqueId] = board
     }

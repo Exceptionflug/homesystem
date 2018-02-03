@@ -2,12 +2,14 @@ package de.exceptionflug.homesystem.commands
 
 import de.exceptionflug.homesystem.HomeSystemPlugin
 import de.exceptionflug.homesystem.home.Home
+import de.exceptionflug.homesystem.request.OwnerSwapRequest
 import de.exceptionflug.homesystem.request.TeleportRequest
 import de.exceptionflug.homesystem.utils.HomePropertiesInventory
 import de.exceptionflug.watertouch.WaterTouchClickableInventoryItem
 import de.exceptionflug.watertouch.WaterTouchMultiPageInventory
 import de.pro_crafting.commandframework.Command
 import de.pro_crafting.commandframework.CommandArgs
+import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -39,6 +41,7 @@ class CommandHomesystem {
         args.sender.sendMessage("§e/hs tpa §7<Spieler> <Haus> §8- §6Sendet eine Anfrage dich zu einem fremden Haus zu teleportieren")
         args.sender.sendMessage("§e/hs addmember §7<Spieler> <Haus> §8- §6Du fügst einen anderen Spieler zu deinem Haus hinzu")
         args.sender.sendMessage("§e/hs removemember §7<Spieler> <Haus> §8- §6Du entfernst einen anderen Spieler von deinem Haus")
+        args.sender.sendMessage("§e/hs swaprequest §7<Spieler> <Haus> §8- §6Du fragst einen anderen Spieler für einen Tausch an")
     }
 
     @Command(name = "hs.sethome", description = "Setzt ein Haus", inGameOnly = true, aliases = ["sethome"], usage = "<Name>")
@@ -336,9 +339,88 @@ class CommandHomesystem {
         }
     }
 
+    @Command(name = "hs.requestswap", description = "Du fragst für einen Tausch an", inGameOnly = true, usage = "<DeinHaus> <Spieler> <Haus>")
+    fun onRequestSwap(args: CommandArgs) {
+        val p = args.player!!
+        if(args.length() < 3) {
+            p.sendMessage("${HomeSystemPlugin.PREFIX} §bBenutzung: /hs swaprequest <DeinHaus> <Spieler> <Haus>")
+        } else {
+            val targetPlayer = Bukkit.getPlayerExact(args.getArgs(1))
+            if (targetPlayer == null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDer angegebene Spieler ist nicht online.")
+                return
+            }
+            if (targetPlayer.uniqueId == p.uniqueId) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDu kannst dir keine Anfragen schicken.")
+                return
+            }
+            val home = HomeSystemPlugin.getInstance().homeStorage.getByName(args.getArgs(2), targetPlayer.uniqueId)
+            if (home == null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDer Spieler §6${targetPlayer.name} §chat kein Haus mit dem Namen §6${args.getArgs(1)}§c.")
+                return
+            }
+            val myHouse = HomeSystemPlugin.getInstance().homeStorage.getByName(args.getArgs(0), p.uniqueId)
+            if(myHouse == null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDu hast kein Haus mit dem Namen §6${args.getArgs(0)}")
+                return
+            }
+            if(getSwapRequestFromTo(p, targetPlayer) != null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDu kannst einem Spieler maximal einen Anfrage senden!")
+                return
+            }
+            HomeSystemPlugin.getInstance().requestManager.requests.add(OwnerSwapRequest(60, TimeUnit.SECONDS, p, targetPlayer, myHouse, home))
+        }
+    }
+
+    @Command(name = "hs.swapaccept", description = "Nimmt einen Tausch an", inGameOnly = true, usage = "<Spieler>")
+    fun onSwapAccept(args: CommandArgs) {
+        val p = args.player!!
+        if(args.length() == 0) {
+            p.sendMessage("${HomeSystemPlugin.PREFIX} §bBenutzung: /hs swapaccept <Spieler>")
+        } else {
+            val targetPlayer = Bukkit.getPlayerExact(args.getArgs(0))
+            if (targetPlayer == null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDer angegebene Spieler ist nicht online")
+                return
+            }
+            val request = getSwapRequestFromTo(targetPlayer, p)
+            if(request == null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDieser Spieler hat dir keine Anfrage gesendet.")
+                return
+            }
+            HomeSystemPlugin.getInstance().requestManager.accept(p, request)
+        }
+    }
+
+    @Command(name = "hs.swapreject", description = "Lehnt einen Tausch ab", inGameOnly = true, usage = "<Spieler>")
+    fun onSwapReject(args: CommandArgs) {
+        val p = args.player!!
+        if(args.length() == 0) {
+            p.sendMessage("${HomeSystemPlugin.PREFIX} §bBenutzung: /hs swapreject <Spieler>")
+        } else {
+            val targetPlayer = Bukkit.getPlayerExact(args.getArgs(0))
+            if (targetPlayer == null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDer angegebene Spieler ist nicht online")
+                return
+            }
+            val request = getSwapRequestFromTo(targetPlayer, p)
+            if(request == null) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDieser Spieler hat dir keine Anfrage gesendet.")
+                return
+            }
+            HomeSystemPlugin.getInstance().requestManager.reject(p, request)
+        }
+    }
+
     private fun getTeleportRequestFromTo(player: Player, targetPlayer: Player): TeleportRequest? {
         return HomeSystemPlugin.getInstance().requestManager.requests
                 .filterIsInstance<TeleportRequest>()
+                .firstOrNull { it.initiator.uniqueId == player.uniqueId && it.targetPlayer.uniqueId == targetPlayer.uniqueId }
+    }
+
+    private fun getSwapRequestFromTo(player: Player, targetPlayer: Player): OwnerSwapRequest? {
+        return HomeSystemPlugin.getInstance().requestManager.requests
+                .filterIsInstance<OwnerSwapRequest>()
                 .firstOrNull { it.initiator.uniqueId == player.uniqueId && it.targetPlayer.uniqueId == targetPlayer.uniqueId }
     }
 

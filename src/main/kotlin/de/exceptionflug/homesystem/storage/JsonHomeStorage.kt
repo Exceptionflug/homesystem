@@ -30,7 +30,7 @@ class JsonHomeStorage(@Transient val backend: File) : IHomeStorage {
         JsonReader(BufferedReader(FileReader(backend))).use {
             try {
                 val jsonHomeStorage = GSON.fromJson<JsonHomeStorage>(it, this::class.java)
-                this.homes = jsonHomeStorage.homes
+                jsonHomeStorage.homes.filterTo(this.homes) {it.location != null} // Filtering valid homes into current set
                 this.swaps = jsonHomeStorage.swaps
             } catch (e: NullPointerException) {
                 // If the file is completely empty, an exception will be thrown while attempting to parse it
