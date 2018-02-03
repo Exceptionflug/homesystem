@@ -4,8 +4,8 @@ import de.exceptionflug.homesystem.HomeSystemPlugin
 import de.exceptionflug.homesystem.home.Home
 import de.exceptionflug.homesystem.request.TeleportRequest
 import de.exceptionflug.homesystem.utils.HomePropertiesInventory
-import de.nanox.nnxcore.spigot.watertouch.WaterTouchClickableInventoryItem
-import de.nanox.nnxcore.spigot.watertouch.WaterTouchMultiPageInventory
+import de.exceptionflug.watertouch.WaterTouchClickableInventoryItem
+import de.exceptionflug.watertouch.WaterTouchMultiPageInventory
 import de.pro_crafting.commandframework.Command
 import de.pro_crafting.commandframework.CommandArgs
 import org.bukkit.Bukkit
@@ -223,6 +223,10 @@ class CommandHomesystem {
                 p.sendMessage("${HomeSystemPlugin.PREFIX} §cDer angegebene Spieler ist nicht online.")
                 return
             }
+            if(targetPlayer.uniqueId == p.uniqueId) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDu kannst dir keine Anfragen schicken.")
+                return
+            }
             val home = HomeSystemPlugin.getInstance().homeStorage.getByName(args.getArgs(1), targetPlayer.uniqueId)
             if(home == null) {
                 p.sendMessage("${HomeSystemPlugin.PREFIX} §cDer Spieler §6${targetPlayer.name} §chat kein Haus mit dem Namen §6${args.getArgs(1)}§c.")
@@ -290,6 +294,10 @@ class CommandHomesystem {
             val home = HomeSystemPlugin.getInstance().homeStorage.getByName(args.getArgs(1), p.uniqueId)
             if(home == null) {
                 p.sendMessage("${HomeSystemPlugin.PREFIX} §cDas Haus §6${args.getArgs(1)} §cexistiert nicht.")
+                return
+            }
+            if(p.uniqueId == offlinePlayer.uniqueId) {
+                p.sendMessage("${HomeSystemPlugin.PREFIX} §cDu kannst dich nicht zu deinen eigenen Häusern hinzufügen.")
                 return
             }
             if(home.members.contains(offlinePlayer.uniqueId)) {

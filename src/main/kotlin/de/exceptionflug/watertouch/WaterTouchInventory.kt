@@ -1,4 +1,4 @@
-package de.nanox.nnxcore.spigot.watertouch
+package de.exceptionflug.watertouch
 
 import org.bukkit.Bukkit
 import org.bukkit.Material

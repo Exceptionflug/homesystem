@@ -8,23 +8,31 @@ import de.exceptionflug.homesystem.request.RequestManager
 import de.exceptionflug.homesystem.storage.IHomeStorage
 import de.exceptionflug.homesystem.storage.JsonHomeStorage
 import de.exceptionflug.homesystem.storage.MySQLHomeStorage
-import de.nanox.nnxcore.spigot.watertouch.WaterTouchInventoryController
+import de.exceptionflug.litboards.LitBoard
+import de.exceptionflug.watertouch.WaterTouchInventoryController
 import de.pro_crafting.commandframework.CommandArgs
 import de.pro_crafting.commandframework.CommandFramework
 import de.pro_crafting.commandframework.Completer
 import org.bukkit.Bukkit
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.net.URI
+import java.util.*
 import java.util.logging.Level
 
-class HomeSystemPlugin : JavaPlugin() {
+class HomeSystemPlugin : JavaPlugin(), Listener {
 
     lateinit var homeStorage: IHomeStorage
         private set
 
     lateinit var requestManager: RequestManager
         private set
+
+    private val mapPlayerToScoreboard = HashMap<UUID, PlayerScoreboard>()
 
     private lateinit var backendType: String
     private lateinit var commandFramework: CommandFramework
@@ -46,6 +54,7 @@ class HomeSystemPlugin : JavaPlugin() {
         commandFramework.inGameOnlyMessage = "§cNur ein Spieler darf diesen Befehl eingeben!"
         WaterTouchInventoryController()
         requestManager = RequestManager()
+        Bukkit.getPluginManager().registerEvents(this, this)
     }
 
     private fun loadYamlConfig() {
@@ -91,8 +100,20 @@ class HomeSystemPlugin : JavaPlugin() {
         return ret
     }
 
+    @EventHandler
+    fun onJoin(e: PlayerJoinEvent) {
+        val board = PlayerScoreboard(e.player)
+        mapPlayerToScoreboard[e.player.uniqueId] = board
+    }
+
+    @EventHandler
+    fun onQuit(e: PlayerQuitEvent) {
+        mapPlayerToScoreboard[e.player.uniqueId]?.stop()
+        mapPlayerToScoreboard.remove(e.player.uniqueId)
+    }
+
     companion object {
-        val PREFIX: String = "§8[§6Home§eSystem§8]§7"
+        const val PREFIX: String = "§8[§6Home§eSystem§8]§7"
         fun getInstance(): HomeSystemPlugin {
             return getPlugin(HomeSystemPlugin::class.java)
         }

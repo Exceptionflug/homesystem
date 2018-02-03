@@ -47,21 +47,23 @@ class MySQLHomeStorage(private val connectionHolder: ConnectionHolder) : IHomeSt
     }
 
     override fun ownerSwap(h1: Home, h2: Home) {
-        val obj1 = HomeSQLObject.getByUUID(h1.id, connectionHolder) ?: throw NullPointerException("Home with id ${h1.id} is not stored in the backend")
-        val obj2 = HomeSQLObject.getByUUID(h2.id, connectionHolder) ?: throw NullPointerException("Home with id ${h2.id} is not stored in the backend")
-        val uuid1 = obj1.owner
-        val uuid2 = obj2.owner
-        obj1.owner = uuid2
-        obj2.owner = uuid1
-        obj1.save()
-        obj2.save()
-        val swap = OwnerSwapSQLObject(connectionHolder)
-        swap.time = System.currentTimeMillis()
-        swap.uuid1 = h1.id.toString()
-        swap.uuid2 = h2.id.toString()
-        swap.insert()
-        h1.ownerID = UUID.fromString(uuid2)
-        h2.ownerID = UUID.fromString(uuid1)
+        Bukkit.getScheduler().runTaskAsynchronously(HomeSystemPlugin.getInstance(), {
+            val obj1 = HomeSQLObject.getByUUID(h1.id, connectionHolder) ?: throw NullPointerException("Home with id ${h1.id} is not stored in the backend")
+            val obj2 = HomeSQLObject.getByUUID(h2.id, connectionHolder) ?: throw NullPointerException("Home with id ${h2.id} is not stored in the backend")
+            val uuid1 = obj1.owner
+            val uuid2 = obj2.owner
+            obj1.owner = uuid2
+            obj2.owner = uuid1
+            obj1.save()
+            obj2.save()
+            val swap = OwnerSwapSQLObject(connectionHolder)
+            swap.time = System.currentTimeMillis()
+            swap.uuid1 = h1.id.toString()
+            swap.uuid2 = h2.id.toString()
+            swap.insert()
+            h1.ownerID = UUID.fromString(uuid2)
+            h2.ownerID = UUID.fromString(uuid1)
+        })
     }
 
     override fun getAllSwaps(): Set<IOwnerSwap> {
@@ -69,8 +71,10 @@ class MySQLHomeStorage(private val connectionHolder: ConnectionHolder) : IHomeSt
     }
 
     override fun delete(home: Home) {
-        val obj = HomeSQLObject.getByUUID(home.id, connectionHolder) ?: throw NullPointerException("Home with id ${home.id} is not stored in the backend")
-        obj.delete()
+        Bukkit.getScheduler().runTaskAsynchronously(HomeSystemPlugin.getInstance(), {
+            val obj = HomeSQLObject.getByUUID(home.id, connectionHolder) ?: throw NullPointerException("Home with id ${home.id} is not stored in the backend")
+            obj.delete()
+        })
     }
 
     fun getAllSwapsAsync(): Future<Set<OwnerSwapSQLObject>> {

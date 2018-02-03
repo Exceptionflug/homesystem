@@ -1,5 +1,9 @@
-package de.nanox.nnxcore.spigot.watertouch
+package de.exceptionflug.watertouch
 
+import de.exceptionflug.watertouch.WaterTouchClickableInventoryItem
+import de.exceptionflug.watertouch.WaterTouchInventory
+import de.exceptionflug.watertouch.WaterTouchInventoryController
+import de.exceptionflug.watertouch.WaterTouchInventoryItem
 import org.bukkit.Material
 import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.ItemStack

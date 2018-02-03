@@ -2,9 +2,9 @@ package de.exceptionflug.homesystem.utils
 
 import de.exceptionflug.homesystem.HomeSystemPlugin
 import de.exceptionflug.homesystem.home.Home
-import de.nanox.nnxcore.spigot.watertouch.WaterTouchClickableInventoryItem
-import de.nanox.nnxcore.spigot.watertouch.WaterTouchInventory
-import de.nanox.nnxcore.spigot.watertouch.WaterTouchInventoryItem
+import de.exceptionflug.watertouch.WaterTouchClickableInventoryItem
+import de.exceptionflug.watertouch.WaterTouchInventory
+import de.exceptionflug.watertouch.WaterTouchInventoryItem
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound

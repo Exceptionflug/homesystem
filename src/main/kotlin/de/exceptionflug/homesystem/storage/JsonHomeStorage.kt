@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import de.exceptionflug.homesystem.home.Home
 import de.exceptionflug.homesystem.home.IOwnerSwap
+import de.exceptionflug.homesystem.utils.LocationJsonDeserializer
 import de.exceptionflug.homesystem.utils.LocationJsonSerializer
 import org.bukkit.Location
 import java.io.*
@@ -16,7 +17,7 @@ import kotlin.collections.HashSet
 class JsonHomeStorage(@Transient val backend: File) : IHomeStorage {
 
     companion object {
-        val GSON: Gson = GsonBuilder().registerTypeAdapter(Location::class.java, LocationJsonSerializer()).setPrettyPrinting().create()
+        val GSON: Gson = GsonBuilder().registerTypeAdapter(Location::class.java, LocationJsonSerializer()).registerTypeAdapter(Location::class.java, LocationJsonDeserializer()).setPrettyPrinting().create()
     }
 
     private var homes: MutableSet<Home> = HashSet()

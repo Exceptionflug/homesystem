@@ -1,6 +1,5 @@
 package de.exceptionflug.homesystem.utils
 
-import com.google.common.base.Preconditions
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonSerializationContext
@@ -18,6 +17,7 @@ class LocationJsonSerializer() : JsonSerializer<Location> {
         obj.addProperty("z", src.z)
         obj.addProperty("yaw", src.yaw)
         obj.addProperty("pitch", src.pitch)
+        obj.addProperty("world", src.world.name)
         return obj
     }
 
