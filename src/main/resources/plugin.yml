@@ -1,5 +1,6 @@
 name: HomeSystem
 author: Exceptionflug
 version: 1.0
+depend: [ProtocolLib, PacketWrapper]
 
 main: de.exceptionflug.homesystem.HomeSystemPlugin

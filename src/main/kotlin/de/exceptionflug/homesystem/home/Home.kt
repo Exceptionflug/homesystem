@@ -6,9 +6,10 @@ import org.bukkit.entity.Player
 import java.util.*
 import kotlin.collections.HashSet
 
-class Home(val id: UUID, var ownerID: UUID, val location: Location) {
+class Home(val id: UUID, var ownerID: UUID, var location: Location) {
 
     val members: MutableSet<UUID> = HashSet()
+    var name: String = "unnamed"
 
     fun getOwner(): Player? {
         return Bukkit.getPlayer(ownerID)

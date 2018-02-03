@@ -10,7 +10,7 @@ open class SQLObject protected constructor(private val tableName: String, privat
         val sb = StringBuilder("UPDATE $tableName SET ")
         val fields = this.javaClass.declaredFields
         for (f in fields) {
-            if(f.name.equals("Companion")) continue
+            if(f.name == "Companion" || f.type == ConnectionHolder::class.java) continue
             val name = if (f.name.startsWith("_")) f.name.substring(1) else f.name
             sb.append(name + "=?,")
             f.isAccessible = true
@@ -22,7 +22,7 @@ open class SQLObject protected constructor(private val tableName: String, privat
             val ps = connectionHolder.prepareStatement(sql)
             var realIndex = 0
             for (i in 1 until fields.size + 1) {
-                if(fields[i-1].name.equals("Companion")) continue
+                if(fields[i-1].name == "Companion" || fields[i-1].type == ConnectionHolder::class.java) continue
                 realIndex ++
                 try {
                     ps.setObject(realIndex, fields[i - 1].get(this))
@@ -65,7 +65,7 @@ open class SQLObject protected constructor(private val tableName: String, privat
             while (rs.next()) {
                 val fields = this.javaClass.declaredFields
                 for (ff in fields) {
-                    if(ff.name == "Companion") continue
+                    if(ff.name == "Companion" || ff.type == ConnectionHolder::class.java) continue
                     val name = if (ff.name.startsWith("_")) ff.name.substring(1) else ff.name
                     ff.isAccessible = true
                     ff.set(this, rs.getObject(name))
@@ -88,7 +88,7 @@ open class SQLObject protected constructor(private val tableName: String, privat
         var i = 0
         for (f in fields) {
             i++
-            if(f.name.equals("Companion")) {
+            if(f.name == "Companion" || f.type == ConnectionHolder::class.java) {
                 if (i == fields.size) {
                     sb.deleteCharAt(sb.length - 1)
                     sb.append(") VALUES (")
@@ -113,7 +113,7 @@ open class SQLObject protected constructor(private val tableName: String, privat
         i = 0
         for (f in fields) {
             i++
-            if(f.name.equals("Companion")) {
+            if(f.name == "Companion" || f.type == ConnectionHolder::class.java) {
                 if (i == fields.size) {
                     sb.deleteCharAt(sb.length - 1)
                     sb.append(")")
@@ -136,7 +136,8 @@ open class SQLObject protected constructor(private val tableName: String, privat
         val ps = connectionHolder.prepareStatement(sb.toString())
         i = 0
         for (f in fields) {
-            if (f.get(this) == null || f.name.equals("Companion")) {
+            if(!f.isAccessible) f.isAccessible = true
+            if (f.get(this) == null || f.name == "Companion" || f.type == ConnectionHolder::class.java) {
                 continue
             }
             i++
@@ -154,6 +155,13 @@ open class SQLObject protected constructor(private val tableName: String, privat
         for (ff in fields) {
             i++
             val name = if (ff.name.startsWith("_")) ff.name.substring(1) else ff.name
+            if(ff.type == ConnectionHolder::class.java || ff.name == "Companion") {
+                if (i == fields.size) {
+                    builder.deleteCharAt(builder.length - 2)
+                    builder.append(")")
+                }
+                continue
+            }
             if (!name.equals("id", ignoreCase = true)) {
                 builder.append(name).append(" ").append(getType(ff.type))
             }

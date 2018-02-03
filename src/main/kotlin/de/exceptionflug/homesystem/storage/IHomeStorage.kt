@@ -1,6 +1,7 @@
 package de.exceptionflug.homesystem.storage
 
 import de.exceptionflug.homesystem.home.Home
+import de.exceptionflug.homesystem.home.IOwnerSwap
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -9,6 +10,8 @@ interface IHomeStorage {
     fun save(home: Home)
     fun load(id: UUID): Home?
     fun getAll(): Set<Home>
+    fun ownerSwap(h1: Home, h2: Home)
+    fun getAllSwaps(): Set<IOwnerSwap>
 
     fun getByOwner(uuid: UUID): Set<Home> {
         val all = getAll()
@@ -24,4 +27,8 @@ interface IHomeStorage {
         return byMember
     }
 
+    fun getByName(name: String, uniqueId: UUID): Home? {
+        val all = getAll()
+        return all.firstOrNull {it.name == name && it.ownerID == uniqueId}
+    }
 }
