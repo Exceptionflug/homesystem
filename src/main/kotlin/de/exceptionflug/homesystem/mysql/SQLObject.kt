@@ -207,4 +207,15 @@ open class SQLObject protected constructor(private val tableName: String, privat
         }
     }
 
+    fun delete() {
+        val ps = connectionHolder.prepareStatement("DELETE FROM $tableName WHERE id=?")
+        val fid = this.javaClass.getDeclaredField("id")
+        if(!fid.isAccessible) {
+            fid.isAccessible = true
+        }
+        ps.setObject(1, fid.get(this))
+        connectionHolder.executeUpdate(ps)
+        ps.close()
+    }
+
 }

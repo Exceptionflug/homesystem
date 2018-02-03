@@ -47,10 +47,8 @@ class MySQLHomeStorage(private val connectionHolder: ConnectionHolder) : IHomeSt
     }
 
     override fun ownerSwap(h1: Home, h2: Home) {
-        val obj1 = HomeSQLObject.getByUUID(h1.id, connectionHolder)
-                ?: throw NullPointerException("Home with id ${h1.id} is not stored in the backend")
-        val obj2 = HomeSQLObject.getByUUID(h2.id, connectionHolder)
-                ?: throw NullPointerException("Home with id ${h2.id} is not stored in the backend")
+        val obj1 = HomeSQLObject.getByUUID(h1.id, connectionHolder) ?: throw NullPointerException("Home with id ${h1.id} is not stored in the backend")
+        val obj2 = HomeSQLObject.getByUUID(h2.id, connectionHolder) ?: throw NullPointerException("Home with id ${h2.id} is not stored in the backend")
         val uuid1 = obj1.owner
         val uuid2 = obj2.owner
         obj1.owner = uuid2
@@ -68,6 +66,11 @@ class MySQLHomeStorage(private val connectionHolder: ConnectionHolder) : IHomeSt
 
     override fun getAllSwaps(): Set<IOwnerSwap> {
         return getAllSwapsAsync().get()
+    }
+
+    override fun delete(home: Home) {
+        val obj = HomeSQLObject.getByUUID(home.id, connectionHolder) ?: throw NullPointerException("Home with id ${home.id} is not stored in the backend")
+        obj.delete()
     }
 
     fun getAllSwapsAsync(): Future<Set<OwnerSwapSQLObject>> {

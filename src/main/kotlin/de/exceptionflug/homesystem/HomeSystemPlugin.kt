@@ -7,6 +7,7 @@ import de.exceptionflug.homesystem.mysql.OwnerSwapSQLObject
 import de.exceptionflug.homesystem.storage.IHomeStorage
 import de.exceptionflug.homesystem.storage.JsonHomeStorage
 import de.exceptionflug.homesystem.storage.MySQLHomeStorage
+import de.nanox.nnxcore.spigot.watertouch.WaterTouchInventoryController
 import de.pro_crafting.commandframework.CommandArgs
 import de.pro_crafting.commandframework.CommandFramework
 import de.pro_crafting.commandframework.Completer
@@ -39,6 +40,7 @@ class HomeSystemPlugin : JavaPlugin() {
         commandFramework.registerCommands(CommandHomesystem())
         commandFramework.registerHelp()
         commandFramework.inGameOnlyMessage = "§cNur ein Spieler darf diesen Befehl eingeben!"
+        WaterTouchInventoryController()
     }
 
     private fun loadYamlConfig() {

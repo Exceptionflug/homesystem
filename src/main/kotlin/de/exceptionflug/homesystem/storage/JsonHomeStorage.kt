@@ -78,11 +78,28 @@ class JsonHomeStorage(@Transient val backend: File) : IHomeStorage {
         val uuidH2 = h2.ownerID
         h1.ownerID = uuidH2
         h2.ownerID = uuidH1
-        GSON.toJson(this, this::class.java, JsonWriter(FileWriter(backend)))
+        val json = GSON.toJson(this, this::class.java).split("\n")
+        val printWriter = PrintWriter(FileWriter(backend))
+        for(line in json) {
+            printWriter.println(line)
+        }
+        printWriter.flush()
+        printWriter.close()
     }
 
     override fun getAllSwaps(): Set<IOwnerSwap> {
         return swaps
+    }
+
+    override fun delete(home: Home) {
+        homes.remove(home)
+        val json = GSON.toJson(this, this::class.java).split("\n")
+        val printWriter = PrintWriter(FileWriter(backend))
+        for(line in json) {
+            printWriter.println(line)
+        }
+        printWriter.flush()
+        printWriter.close()
     }
 
 }

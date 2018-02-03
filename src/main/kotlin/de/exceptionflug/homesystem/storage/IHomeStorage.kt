@@ -9,6 +9,7 @@ interface IHomeStorage {
 
     fun save(home: Home)
     fun load(id: UUID): Home?
+    fun delete(home: Home)
     fun getAll(): Set<Home>
     fun ownerSwap(h1: Home, h2: Home)
     fun getAllSwaps(): Set<IOwnerSwap>
@@ -25,6 +26,14 @@ interface IHomeStorage {
         val byMember = HashSet<Home>()
         all.filterTo(byMember) {it.members.contains(uuid)}
         return byMember
+    }
+
+    fun getByMemberWithName(uuid: UUID, name: String): Home? {
+        val all = getAll()
+        for(home in all) {
+            if(home.members.contains(uuid) && home.name == name) return home
+        }
+        return null
     }
 
     fun getByName(name: String, uniqueId: UUID): Home? {
