@@ -4,6 +4,7 @@ import de.exceptionflug.homesystem.commands.CommandHomesystem
 import de.exceptionflug.homesystem.mysql.ConnectionHolder
 import de.exceptionflug.homesystem.mysql.HomeSQLObject
 import de.exceptionflug.homesystem.mysql.OwnerSwapSQLObject
+import de.exceptionflug.homesystem.request.RequestManager
 import de.exceptionflug.homesystem.storage.IHomeStorage
 import de.exceptionflug.homesystem.storage.JsonHomeStorage
 import de.exceptionflug.homesystem.storage.MySQLHomeStorage
@@ -20,6 +21,9 @@ import java.util.logging.Level
 class HomeSystemPlugin : JavaPlugin() {
 
     lateinit var homeStorage: IHomeStorage
+        private set
+
+    lateinit var requestManager: RequestManager
         private set
 
     private lateinit var backendType: String
@@ -41,6 +45,7 @@ class HomeSystemPlugin : JavaPlugin() {
         commandFramework.registerHelp()
         commandFramework.inGameOnlyMessage = "§cNur ein Spieler darf diesen Befehl eingeben!"
         WaterTouchInventoryController()
+        requestManager = RequestManager()
     }
 
     private fun loadYamlConfig() {
